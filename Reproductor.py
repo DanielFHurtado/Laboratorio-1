@@ -1,12 +1,21 @@
 import tkinter as tk
 from tkinter import *
 from tkinter import messagebox
+from tkinter import Scale
 from Tooltip import Tooltip
 import pygame.mixer as mx
 import os
 from tkinter import ttk
 
 class Reproductor():
+
+    def act_barra_repro(self):
+        if mx.music.get_pos():
+            pos_actual = mx.music.get_pos() // 1000
+            porcentaje = (pos_actual / self.duracion) * 100
+            self.barra_repro['value'] = porcentaje
+            self.ventana.after(1000, self.act_barra_repro)
+
     def play(self):
         index = self.selected_song.get()
         song_path = self.song_paths[index]
@@ -17,6 +26,8 @@ class Reproductor():
         self.btnPause.config(state="normal")
         self.btnStop.config(state="normal")
         self.btnPlay.config(state="disabled")
+        self.duracion = mx.Sound(self.current_song).get_length()
+        self.act_barra_repro()
     
     def pause(self):
         if self.paused:
@@ -42,6 +53,7 @@ class Reproductor():
         self.btnPause.config(state="disabled")
         self.btnStop.config(state="disabled")
         self.btnPlay.config(state="normal")
+        self.barra_repro['value'] = 0
        
     def saltarCancion(self):
         self.numeroC += 1
@@ -90,7 +102,7 @@ class Reproductor():
             self.btnStop.config(state="normal")
             self.btnPlay.config(state="disabled")   
     def salto10(self):
-        posicion = mx.music.get_pos() / 100  
+        posicion = mx.music.get_pos() / 1000
         nuevaP = posicion + 10  
         mx.music.set_pos(nuevaP)  
     def retroceso10(self):
@@ -109,10 +121,14 @@ class Reproductor():
         self.ventana.resizable(0, 0)
         mx.init()
 
+        self.fondo = tk.PhotoImage(file=r"Laboratorio-1\imagenes_repro\Imagen Audifonos.png")
+        self.label_fondo = Label(self.ventana, image=self.fondo)
+        self.label_fondo.place(x=0.5, y=0.5)
+
         self.song_paths = [
-            r"SONIDOS\sounds\Du-Hast-Rammstein.mp3",
-            r"SONIDOS\sounds\Sharp-Dressed-Man-ZZ-top.mp3",
-            r"SONIDOS\sounds\One-Metallica.mp3"
+            r"Laboratorio-1\sounds\Du-Hast-Rammstein.mp3",
+            r"Laboratorio-1\sounds\Sharp-Dressed-Man-ZZ-top.mp3",
+            r"Laboratorio-1\sounds\One-Metallica.mp3"
         ]
 
         self.song_names = [os.path.basename(song_path) for song_path in self.song_paths]
@@ -123,13 +139,14 @@ class Reproductor():
         self.numeroC = 0  
         self.paused = False
 
-        iconPlay = tk.PhotoImage(file=r"SONIDOS\icons\control_play.png")
-        iconPause = tk.PhotoImage(file=r"SONIDOS\icons\control_play_blue.png")
-        iconStop = tk.PhotoImage(file=r"SONIDOS\icons\control_stop_blue.png")
-        iconPasar = tk.PhotoImage(file=r"SONIDOS\icons\control_end_blue.png")
-        iconRetroceder = tk.PhotoImage(file=r"SONIDOS\icons\control_start_blue.png")
-        iconFasterade10 = tk.PhotoImage(file=r"SONIDOS\icons\control_fastforward_blue.png")
-        iconFasteratr10 = tk.PhotoImage(file=r"SONIDOS\icons\control_rewind_blue.png")
+        iconPlay = tk.PhotoImage(file=r"Laboratorio-1\imagenes_repro\control_play.png")
+        iconPause = tk.PhotoImage(file=r"Laboratorio-1\imagenes_repro\control_play_blue.png")
+        iconStop = tk.PhotoImage(file=r"Laboratorio-1\imagenes_repro\control_stop_blue.png")
+        iconPasar = tk.PhotoImage(file=r"Laboratorio-1\imagenes_repro\control_end_blue.png")
+        iconRetroceder = tk.PhotoImage(file=r"Laboratorio-1\imagenes_repro\control_start_blue.png")
+        iconFasterade10 = tk.PhotoImage(file=r"Laboratorio-1\imagenes_repro\control_fastforward_blue.png")
+        iconFasteratr10 = tk.PhotoImage(file=r"Laboratorio-1\imagenes_repro\control_rewind_blue.png")
+
         self.btnPlay = tk.Button(self.ventana, image=iconPlay, command=self.play)
         self.btnPlay.place(relx=0.5, rely=1, y=-50, width=25, height=25)
         Tooltip(self.btnPlay, "Presione para iniciar la reproducción")
@@ -161,6 +178,10 @@ class Reproductor():
         self.lblListaCanciones.place(x=370, y=25)
         song_menu = tk.OptionMenu(self.ventana, self.selected_song, *range(len(self.song_paths)), command=self.update_label)
         song_menu.place(x=425, y=50)
+
+        self.barra_repro = ttk.Progressbar(self.ventana, orient='horizontal', length=300, mode='determinate')
+        self.barra_repro.place(x=100, y=350)
+
 
         self.ventana.mainloop()
 
