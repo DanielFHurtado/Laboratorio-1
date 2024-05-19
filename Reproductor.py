@@ -138,10 +138,8 @@ class Reproductor():
             
             self.reproducir_cancion_selec(cancion_seleccionada)
                 
-    def actualizar_estado(self, value):
-        index = int(value)
-        song_path = self.song_paths[index]
-        self.lblEstado.config(text="Seleccionado: " + os.path.basename(song_path))
+   
+        
     def __init__(self):
         self.ventana = tk.Tk()
         self.ventana.title("Reproductor de Música")
