@@ -101,23 +101,28 @@ class Reproductor():
             self.btnPause.config(state="normal")
             self.btnStop.config(state="normal")
             self.btnPlay.config(state="disabled")   
+
     def salto10(self):
         posicion = mx.music.get_pos() / 1000
         nuevaP = posicion + 10  
         mx.music.set_pos(nuevaP)  
+
     def retroceso10(self):
         posicion = mx.music.get_pos() / 1000  
         nuevaP = max(0, posicion - 10) 
         song_path = self.song_paths[self.selected_song.get()]  
         mx.music.load(song_path)  
         mx.music.play(start=nuevaP)  
-        
+
+    def volumen(self, vol):
+        volumen = int(vol) / 100
+        mx.music.set_volume(volumen)
         
         
     def __init__(self):
         self.ventana = tk.Tk()
         self.ventana.title("Reproductor de Música")
-        self.ventana.config(width=500, height=500)
+        self.ventana.config(width=650, height=450)
         self.ventana.resizable(0, 0)
         mx.init()
 
@@ -161,27 +166,39 @@ class Reproductor():
         
         self.btnPasar = tk.Button(self.ventana, image=iconPasar, command=self.saltarCancion)
         self.btnPasar.place(relx=0.5, rely=1, y=-50, x=80, width=25, height=25)
+        Tooltip(self.btnPasar, "Siguiente Canción")
         
         self.btnRetroceder = tk.Button(self.ventana, image=iconRetroceder, command=self.retrocederCancion)
         self.btnRetroceder.place(relx=0.5, rely=1, y=-50, x=-80, width=25, height=25)
+        Tooltip(self.btnRetroceder, "Canción Anterior")
         
         self.btnAvanzar =tk.Button(self.ventana, image=iconFasterade10, command=self.salto10)
         self.btnAvanzar.place(relx=0.5, rely=1, y=-50, x=110, width=25, height=25)
+        Tooltip(self.btnAvanzar, "+10sg")
         
         self.btnRetroceso =tk.Button(self.ventana, image=iconFasteratr10, command=self.retroceso10)
         self.btnRetroceso.place(relx=0.5, rely=1, y=-50, x=-110, width=25, height=25)
+        Tooltip(self.btnRetroceso, "-10sg")
         
         self.lblEstado = tk.Label(self.ventana, text="Cargando...")
-        self.lblEstado.place(relx=0.5, rely=0.5, anchor="center")
+        self.lblEstado.place(relx=0.52, y=325, anchor="center")
 
         self.lblListaCanciones = tk.Label(self.ventana, text="Lista de Canciones")
-        self.lblListaCanciones.place(x=370, y=25)
+        self.lblListaCanciones.place(relx=0.8, y=15)
         song_menu = tk.OptionMenu(self.ventana, self.selected_song, *range(len(self.song_paths)), command=self.update_label)
-        song_menu.place(x=425, y=50)
+        song_menu.place(relx=0.88, y=40)
+
+        self.listaCanciones = tk.Listbox(self.ventana)
+        self.listaCanciones.place(relx=0.7, y=40, relwidth=0.25, relheight=0.4)
+        self.listaCanciones.bind("<<ListboxSelect>>", lambda event: self.update_label(self.listaCanciones.curselection()))
 
         self.barra_repro = ttk.Progressbar(self.ventana, orient='horizontal', length=300, mode='determinate')
-        self.barra_repro.place(x=100, y=350)
+        self.barra_repro.place(relx=0.28, y=350)
 
+        self.btnVolumen = Scale(self.ventana, from_=100, to=0, orient=VERTICAL, command=self.volumen)
+        self.btnVolumen.set(50)
+        self.btnVolumen.place(relx=0.9, y=300, relwidth=0.4)
+        Tooltip(self.btnVolumen, "Subir o Bajar el volumen")
 
         self.ventana.mainloop()
 
