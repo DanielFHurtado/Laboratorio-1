@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import *
-from tkinter import messagebox
 from tkinter import Scale
 from Tooltip import Tooltip
 import pygame.mixer as mx
@@ -8,7 +7,7 @@ import os
 from tkinter import ttk
 
 class Reproductor():
-
+    
     def act_barra_repro(self):
         if mx.music.get_pos():
             pos_actual = mx.music.get_pos() // 1000
@@ -117,8 +116,32 @@ class Reproductor():
     def volumen(self, vol):
         volumen = int(vol) / 100
         mx.music.set_volume(volumen)
+    
+    def reproducir_cancion_selec(self, song_paths):
         
+        mx.music.stop()
+       
+        mx.music.load(song_paths)
+       
+        mx.music.play()
+
+    def actualizar_cancion(self, event):
         
+        seleccion = self.listaCanciones.curselection()
+        if seleccion:
+           
+            index = seleccion[0]
+            
+            cancion_seleccionada = self.song_paths[index]
+           
+            self.label.config(text=f"Seleccionaste: {os.path.basename(cancion_seleccionada)}")
+            
+            self.reproducir_cancion_selec(cancion_seleccionada)
+                
+    def actualizar_estado(self, value):
+        index = int(value)
+        song_path = self.song_paths[index]
+        self.lblEstado.config(text="Seleccionado: " + os.path.basename(song_path))
     def __init__(self):
         self.ventana = tk.Tk()
         self.ventana.title("Reproductor de Música")
@@ -131,9 +154,9 @@ class Reproductor():
         self.label_fondo.place(x=0.5, y=0.5)
 
         self.song_paths = [
-            r"Laboratorio-1\sounds\Du-Hast-Rammstein.mp3",
-            r"Laboratorio-1\sounds\Sharp-Dressed-Man-ZZ-top.mp3",
-            r"Laboratorio-1\sounds\One-Metallica.mp3"
+            r"C:\Users\juane\OneDrive\Escritorio\laboratorio_1\Laboratorio-1\sounds\Du-Hast-Rammstein.mp3",
+            r"C:\Users\juane\OneDrive\Escritorio\laboratorio_1\Laboratorio-1\sounds\Sharp-Dressed-Man-ZZ-top.mp3",
+            r"C:\Users\juane\OneDrive\Escritorio\laboratorio_1\Laboratorio-1\sounds\One-Metallica.mp3"
         ]
 
         self.song_names = [os.path.basename(song_path) for song_path in self.song_paths]
@@ -183,15 +206,21 @@ class Reproductor():
         self.lblEstado = tk.Label(self.ventana, text="Cargando...")
         self.lblEstado.place(relx=0.52, y=325, anchor="center")
 
-        self.lblListaCanciones = tk.Label(self.ventana, text="Lista de Canciones")
-        self.lblListaCanciones.place(relx=0.8, y=15)
-        song_menu = tk.OptionMenu(self.ventana, self.selected_song, *range(len(self.song_paths)), command=self.update_label)
-        song_menu.place(relx=0.88, y=40)
+      
 
         self.listaCanciones = tk.Listbox(self.ventana)
         self.listaCanciones.place(relx=0.7, y=40, relwidth=0.25, relheight=0.4)
-        self.listaCanciones.bind("<<ListboxSelect>>", lambda event: self.update_label(self.listaCanciones.curselection()))
 
+        for song in self.song_names:
+            self.listaCanciones.insert(tk.END, os.path.basename(song))
+
+        
+        self.label = tk.Label(self.ventana, text="Seleccione una canción")
+        self.label.place(relx=0.7, y=10)
+
+      
+        self.listaCanciones.bind("<<ListboxSelect>>", self.actualizar_cancion)
+        
         self.barra_repro = ttk.Progressbar(self.ventana, orient='horizontal', length=300, mode='determinate')
         self.barra_repro.place(relx=0.28, y=350)
 
@@ -201,8 +230,5 @@ class Reproductor():
         Tooltip(self.btnVolumen, "Subir o Bajar el volumen")
 
         self.ventana.mainloop()
-
-    def update_label(self, value):
-        index = int(value)
-        song_path = self.song_paths[index]
-        self.lblEstado.config(text="Seleccionado: " + os.path.basename(song_path))
+    
+    
